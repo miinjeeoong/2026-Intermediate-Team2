@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const long long INF = 1e18;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int N, M;
+    cin >> N >> M;
+
+    vector<tuple<int, int, int>> edges(M);
+    
+    vector<vector<int>> adj(N + 1);
+
+    for (auto& [u, v, w] : edges) {
+        cin >> u >> v >> w;
+        adj[u].push_back(v);
+    }
+
+    
+    vector<long long> dist(N + 1, INF);
+    dist[1] = 0;
+
+    for (int i = 0; i < N - 1; i++) {
+        for (auto& [u, v, w] : edges) {
+            if (dist[u] != INF && dist[u] + w < dist[v])
+                dist[v] = dist[u] + w;
+        }
+    }
+
+    
+    
+    vector<bool> in_neg_cycle(N + 1, false);
+    for (auto& [u, v, w] : edges) {
+        if (dist[u] != INF && dist[u] + w < dist[v]) {
+            in_neg_cycle[v] = true;
+        }
+    }
+
+    
+    queue<int> q;
+    for (int i = 1; i <= N; i++)
+        if (in_neg_cycle[i]) q.push(i);
+
+    while (!q.empty()) {
+        int cur = q.front(); q.pop();
+        for (int nxt : adj[cur]) {
+            if (!in_neg_cycle[nxt]) {
+                in_neg_cycle[nxt] = true;
+                q.push(nxt);
+            }
+        }
+    }
+
+    
+    if (dist[N] == INF)          cout << "INF\n";
+    else if (in_neg_cycle[N])    cout << "-INF\n";
+    else                         cout << dist[N] << "\n";
+
+    return 0;
+}
